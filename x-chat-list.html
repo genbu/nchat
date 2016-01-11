@@ -1,0 +1,146 @@
+<!--
+A single user list with a username, avatar, and desc.
+
+##### Example
+
+	<x-chat-list avatar="url" username="name" message="hello" status="online" timestamp="1420145273945"></x-chat-list>
+
+-->
+<script src="bower_components/time-elements/time-elements.js"></script>
+
+
+
+<dom-module id="x-chat-list">
+
+<style>
+	:host {
+		display: block;
+        position: relative;
+		width: 100%;
+		border-bottom: 1px solid #e0e0e0;
+        font-size: 16px;
+        min-height: 72px;
+        z-index: 0;
+	}
+	.user-list {
+		padding: 16px;
+	}
+	.avatar {
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+  		margin: 0 16px 0 0;
+		background: #9e9e9e url(1.png) center center no-repeat;
+		background-size: contain;
+		position: relative;
+	}
+	.status {
+		position: absolute;
+		bottom: -3px;
+		right: -3px;
+		border-radius: 50%;
+		width: 14px;
+		height: 14px;
+		background-color: #7EDF25;
+		display: none;
+	}
+	.status.online {
+		display: block;
+	}
+	.username {
+		text-transform: capitalize;
+		font-weight: 500;
+		color: #919191;
+		line-height: 1.3em;
+		max-width: 90%;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+	.timestamp {
+		font-size: 0.75em;
+		color: #919191;
+	}
+	.avatar {
+    	border: solid 3px silver;
+	}
+	.avatar.1 {
+	    border-color: #393b79;
+	}
+	.avatar.2 {
+	    border-color: #6b6ecf;
+	}
+	.avatar.3 {
+	    border-color: #637939;
+	}
+	.avatar.4 {
+	    border-color: #b5cf6b;
+	}
+	.avatar.5 {
+	    border-color: #8c6d31;
+	}
+	.avatar.6 {
+	    border-color: #e7ba52;
+	}
+	.avatar.7 {
+	    border-color: #843c39;
+	}
+	.avatar.8 {
+	    border-color: #d6616b;
+	}
+	.avatar.9 {
+	    border-color: #7b4173;
+	}
+	.avatar.10 {
+	    border-color: #ce6dbd;
+	}
+	</style>
+
+<!-- Polymer 1.0 change
+The most common attributes (class, style ...) should now use the '$=' operator instead of the '=' operator when assigned dynamic values.
+See: https://www.polymer-project.org/1.0/docs/devguide/data-binding.html#native-binding
+Also, dynamic values can no longer be concencated. This is not possible any more: <div class="{{value1}} green"></div>. Instead a computed property
+or a method call should be made which returns the wanted String until they implement this (apparently it's in the road-map).
+-->
+<template>
+	<section class="user-list layout horizontal">
+		<div class$="{{_colorClass(color)}}" style$="{{_backgroundImage(avatar)}})">
+			<div class$="{{_statusClass(status)}}"></div>
+		</div>
+		<div class="flex">
+			<div class="username">{{username}}</div>
+			<div class="text">{{text}}</div>
+		</div>
+		<time class="timestamp" is="relative-time" datetime$="{{timestamp}}"></time>
+	</section>
+</template>
+
+
+<!-- Polymer 1.0 change
+Published properties should now be defined as seen below (the properties-object)
+-->
+<script>
+Polymer({
+		is: 'x-chat-list',
+		properties: {
+			avatar: '',
+			color: '',
+			username: '',
+			text: '',
+			status: '',
+			timestamp: new Date().toISOString()
+		},
+		_colorClass: function(color) {
+        	return 'avatar '+color;
+    	},
+    	_backgroundImage: function(avatar) {
+        	return 'background-image: url('+avatar+');';
+    	},
+    	_statusClass: function(status) {
+        	return 'status ' + status;
+    	}
+});
+</script>
+
+
+</dom-module>

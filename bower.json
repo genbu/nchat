@@ -1,0 +1,30 @@
+{
+  "name": "chatbuatsemuav3.0.3",
+  "version": "3.0.3",
+  "authors": [
+    "genbu <genbumaster@gmail.com>"
+  ],
+  "description": "Chat buat semua",
+  "keywords": [
+    "polymer",
+    "material",
+    "design",
+    "pubnub",
+    "chat"
+  ],
+  "license": "MIT",
+  "homepage": "pubnub.com",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#1.0.0",
+    "pubnub-element": "4.0.0",
+    "time-elements": "0.4.0"
+  }
+}

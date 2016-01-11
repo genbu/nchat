@@ -1,0 +1,154 @@
+(function() {
+    'use strict';
+
+    var uuid, avatar, color, cat;
+
+    // Assign a uuid made of a random cat and a random color
+    var randomColor = function() {
+        var colors = ['tamu', 'tamu', 'tamu', 'tamu', 'tamu', 'tamu', 'tamu', 'tamu', 'tamu', 'tamu'];
+        return colors[(Math.random() * colors.length) >>> 0];
+    };
+
+    var randomCat = function() {
+        var cats = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+        return cats[(Math.random() * cats.length) >>> 0];
+    };
+
+    color = randomColor();
+    cat = randomCat();
+    uuid = color + '-' + cat;
+    avatar = 'images/' + cat + '.png';
+
+    function showNewest() {
+        var chatDiv = document.querySelector('.chat-list');
+        chatDiv.scrollTop = chatDiv.scrollHeight; //TODO: Need to fix so that we can find the .chat-list class object
+    }
+
+    /* Polymer UI and UX */
+    var template = Polymer.dom(this).querySelector('template[is=dom-bind]');
+
+    template.channel = 'polymer-chat';
+    template.uuid = uuid;
+    template.avatar = avatar;
+    template.color = color;
+    template.cats = [];
+
+    template.checkKey = function(e) {
+        if(e.keyCode === 13 || e.charCode === 13) {
+            template.publish();
+        }
+    };
+
+    template.sendMyMessage = function(e) {
+        template.publish();
+    };
+
+    template.messageList = [];
+
+
+    /* PubNub Realtime Chat */
+
+    /* Polymer 1.0 change
+    As you can see below instead of onlineUuids.push(d.uuid), we now use this.push("cats", d.uuid). 
+    This will add d.uuid directly to the cats variable in our object and also notify that a change has occured. Polymer 0.5 used
+    dirty checking which was not very effecient. In other words; whenever you want to add something to an array and want for example UI to be updated
+    use this.push("nameOnVariable", value).
+    */
+
+    var pastMsgs = [];
+
+    template.getListWithOnlineStatus = function(list) {
+        [].forEach.call(list, function(l) {
+            // sanitize avatars
+            var catName = (l.uuid + '').split('-')[1];
+            l.avatar = 'images/' + catName + '.png';
+
+            if (catName === undefined || /\s/.test(l.uuid)) {
+                l.uuid = 'fail-cat';
+                console.log('Oh you, I made this demo open so nice devs can play with, but you are soiling everything :-(');
+            }
+
+            if(template.cats.indexOf(l.uuid) > -1) {
+                l.status = 'online';
+            } else {
+                l.status = 'offline';
+            }
+        });
+        return list;
+    };
+
+    template.displayChatList = function(list) {
+        template.messageList = list;
+        // scroll to bottom when all list items are displayed
+        template.async(showNewest);
+    };
+
+    template.subscribeCallback = function(e) {
+        if(template.$.sub.messages.length > 0) {
+            this.displayChatList(pastMsgs.concat(this.getListWithOnlineStatus(template.$.sub.messages)));
+        }
+    };
+
+    template.presenceChanged = function(e) {
+        var i = 0;
+        var l = template.$.sub.presence.length;
+        var d = template.$.sub.presence[l - 1];
+
+        // how many users
+        template.occupancy = d.occupancy;
+
+        // who are online
+        if(d.action === 'join') {
+            if(d.uuid.length > 35) { // console
+                d.uuid = 'the-mighty-big-cat';
+            }
+            this.push("cats", d.uuid);
+            
+        } else {
+            var idx = template.cats.indexOf(d.uuid);
+            if(idx > -1) {
+                this.splice("cats", idx, 1);
+            }
+        }
+
+        i++;
+
+        // update the status at the main column
+        if(template.messageList.length > 0) {
+            template.messageList = this.getListWithOnlineStatus(template.messageList);
+        }
+    };
+
+    template.historyRetrieved = function(e) {
+        if(e.detail[0].length > 0) {
+            pastMsgs = this.getListWithOnlineStatus(e.detail[0]);
+            this.displayChatList(pastMsgs);
+        }
+    };
+
+    template.publish = function() {
+        if(!template.input) return;
+
+        template.$.pub.message = {
+            uuid: uuid,
+            avatar: avatar,
+            color: color,
+            text: template.input,
+            timestamp: new Date().toISOString()
+        };
+        template.$.pub.publish();
+        template.input = '';
+    };
+
+    template.error = function(e) {
+        console.log(e);
+    };
+
+    template._colorClass = function(color) {
+        return 'middle avatar '+color;
+    };
+
+    template._backgroundImage = function(avatar) {
+        return 'background-image: url('+avatar+');';
+    };
+})();
